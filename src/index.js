@@ -1,13 +1,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
+import {InterviewContextProvider} from './context/InterviewContext'
+import { SpeechRecognizationProvider } from './context/SpeechRecognizationContext';
+import Main from './Main';
+import { BrowserRouter } from 'react-router-dom';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <BrowserRouter>
+  <InterviewContextProvider>
+  <SpeechRecognizationProvider>
+    <Main />
+  </SpeechRecognizationProvider>
+  </InterviewContextProvider>
+  </BrowserRouter>
+   </React.StrictMode>,
   document.getElementById('root')
 );
 
