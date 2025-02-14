@@ -176,9 +176,14 @@ const SpeechRecognizationProvider = ({ children }) => {
     const [speechRecognizer, setSpeechRecognizer] = useState(null);
     const { setSpeechText, setInterviewOpen } = useInterviewStart();
     const lastRecognizedTextRef = useRef("");  // To store the last recognized text to avoid duplicates
+ 
+    const apiKey = process.env.REACT_APP_AZURE_KEY;
+    const region = process.env.REACT_APP_AZURE_REGION;
 
-    const apiKey = "28aaea61d2c54e23a42188bec636646c"; // Replace with your Azure Speech API key
-    const region = "eastus"; // Replace with your Azure Speech region
+
+ 
+
+    //console.log("APIKEY",apiKey,region);
 
     const startRecording = () => {
         const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(apiKey, region);

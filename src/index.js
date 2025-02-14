@@ -8,7 +8,7 @@ import Main from './Main';
 import { BrowserRouter } from 'react-router-dom';
 
 ReactDOM.render(
-  <React.StrictMode>
+  
   <BrowserRouter>
   <InterviewContextProvider>
   <SpeechRecognizationProvider>
@@ -16,7 +16,7 @@ ReactDOM.render(
   </SpeechRecognizationProvider>
   </InterviewContextProvider>
   </BrowserRouter>
-   </React.StrictMode>,
+   ,
   document.getElementById('root')
 );
 

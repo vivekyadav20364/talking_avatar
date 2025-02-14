@@ -74,7 +74,7 @@ const MultiStepModal = ({ open, handleClose }) => {
       }
       setLoading(false);
     } catch (error) {
-      console.error("Error checking for existing questions:", error);
+     // console.error("Error checking for existing questions:", error);
       toast.error("Failed to check for existing questions.",{
         position: "top-right",
         autoClose: 3000,
@@ -114,12 +114,12 @@ const handleNext = async (
     selectedNumQuestions
   ) => {
     const selectedTypeQuestion = toCamelCase(selectedQuestionBank)
-     console.log("After converting",selectedTypeQuestion)
+     //console.log("After converting",selectedTypeQuestion)
 
-     if (selectedType === "Smart AI Interview") {
-      toast.warning("This interview type is coming soon. Please select a different interview type.");
-      return;
-    }
+    //  if (selectedType === "Smart AI Interview") {
+    //   toast.warning("This interview type is coming soon. Please select a different interview type.");
+    //   return;
+    // }
     
 
     try {
@@ -211,7 +211,7 @@ const handleNext = async (
       setMediaReportLoading(false);
     } catch (error) {
       setMediaReportLoading(false);
-      console.log("Error Occured",error);
+      //console.log("Error Occured",error);
       toast.error("Something went wrong",{
         position: "top-right",
         autoClose: 3000,

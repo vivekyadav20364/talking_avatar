@@ -301,7 +301,7 @@ const CameraCapture = () => {
     // console.log('Starting face detection...');
     const video = webcamRef.current.video;
     const canvas = faceapi.createCanvasFromMedia(video);
-    document.body.append(canvas);
+    //document.body.append(canvas);
 
     const displaySize = {
       width: video.videoWidth,
@@ -329,7 +329,7 @@ const CameraCapture = () => {
       } catch (error) {
         console.error('Error during face detection:', error);
       }
-    }, 1000);
+    }, 3000);
   };
 
   return (

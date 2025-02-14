@@ -117,39 +117,67 @@ function Avatar({ avatar_url, speak, setSpeak, text, setAudioSource, playing }) 
   
     const [clips, setClips] = useState([]);
     const mixer = useMemo(() => new THREE.AnimationMixer(gltf.scene), []);
-  
-    useEffect(() => {
-      // if (speak) {
-      //   setClips([]);
-      //   setAudioSource(null);
-      // }
+ 
+    //OLD AND CORRECT ONE
+
+    // useEffect(() => { 
+    //   if (!speak) return;
     
+    //   makeSpeech(text)
+    //     .then((response) => {
+    //       const { blendData, filename } = response.data;
+    //       const newClips = [
+    //         createAnimation(blendData, morphTargetDictionaryBody, "HG_Body"),
+    //         createAnimation(blendData, morphTargetDictionaryLowerTeeth, "HG_TeethLower"),
+    //       ];
+    
+    //       const fullFilename = host + filename; // Backend path
+    //       const audioSrc = `${fullFilename}?timestamp=${Date.now()}`; // Unique URL
+    //       setClips(newClips);
+    //       setAudioSource(audioSrc); // Set new audio source
+    //     })
+    //     .catch((err) => {
+    //       //console.error(err);
+    //       setSpeak(false);
+    //     });
+    
+    //   // return () => {
+    //   //   setClips([]);
+    //   //   setAudioSource(null);
+    //   // };
+    // }, [speak, text, setAudioSource]);
+  
+
+
+    //NEW TRY FOR SIMULTANEOUS USER
+
+    useEffect(() => {
       if (!speak) return;
     
       makeSpeech(text)
         .then((response) => {
-          const { blendData, filename } = response.data;
+          const { blendData, audio } = response.data;
+         // console.log("AUDIO FILE RECIVEVE IS",audio);
+
           const newClips = [
-            createAnimation(blendData, morphTargetDictionaryBody, "HG_Body"),
-            createAnimation(blendData, morphTargetDictionaryLowerTeeth, "HG_TeethLower"),
+            createAnimation(blendData, morphTargetDictionaryBody, 'HG_Body'),
+            createAnimation(blendData, morphTargetDictionaryLowerTeeth, 'HG_TeethLower'),
           ];
     
-          const fullFilename = host + filename; // Backend path
-          const audioSrc = `${fullFilename}?timestamp=${Date.now()}`; // Unique URL
           setClips(newClips);
-          setAudioSource(audioSrc); // Set new audio source
+    
+          // Use the corrected Base64 audio
+          setAudioSource(audio);
         })
         .catch((err) => {
           console.error(err);
           setSpeak(false);
         });
-    
-      // return () => {
-      //   setClips([]);
-      //   setAudioSource(null);
-      // };
     }, [speak, text, setAudioSource]);
-  
+    
+    
+
+
     const idleFbx = useFBX('/idle.fbx');
     const { clips: idleClips } = useAnimations(idleFbx.animations);
   

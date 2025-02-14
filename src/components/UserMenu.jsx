@@ -16,10 +16,10 @@ import Button from "@mui/material/Button";
 import { useInterviewStart } from "../context/InterviewContext";
 import { Base_Url_Landing_Page_Frontend } from "../utils/baseUri";
 
-export default function AccountMenu() {
+export default function AccountMenu({dialogOpen,setDialogOpen}) {
   const { user } = useInterviewStart();
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const [dialogOpen, setDialogOpen] = React.useState(false);
+  // const [dialogOpen, setDialogOpen] = React.useState(false);
   const open = Boolean(anchorEl);
 
   const handleClick = (event) => {
@@ -46,10 +46,10 @@ export default function AccountMenu() {
   return (
     <React.Fragment>
       <Box sx={{ display: "flex", alignItems: "center", textAlign: "center" }}>
-        <Tooltip title="User">
+        <Tooltip title={`${user?.fullName}`}>
           <IconButton
             onClick={handleClick}
-            size="small"
+            size="medium"
             sx={{ ml: 2 }}
             aria-controls={open ? "account-menu" : undefined}
             aria-haspopup="true"

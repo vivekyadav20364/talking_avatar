@@ -1,7 +1,8 @@
 import axios from "axios";
+import { baseUrl } from "./baseUri";
 
 const API = axios.create({
-  baseURL: "https://api-interview.ezsync.in",
+  baseURL: baseUrl
 });
  
 // Attach token to headers

@@ -12,7 +12,6 @@ import {
   MenuItem,
   Select,
   TextField,
-  Tooltip,
 } from "@mui/material";
 import DeveloperModeIcon from "@mui/icons-material/DeveloperMode";
 import PostAddIcon from "@mui/icons-material/PostAdd";
@@ -35,15 +34,19 @@ const QuestionTypeSelection = ({
 
   const questionOptions = [
     { label: "Question Bank", icon: <DeveloperModeIcon /> },
-    { label: "Paste Job Description", icon: <PostAddIcon /> },
     { label: "Smart AI Interview", icon: <SmartToyIcon /> },
+    { label: "Paste Job Description", icon: <PostAddIcon /> },
+    
   ];
 
   // console.log("existingQuestions,", existingQuestions);
 
-  console.log("selected question bank", selectedQuestionBank);
+  // console.log("selected question bank", selectedQuestionBank);
 
   const questionBankOptions = [
+    "React Js",
+    "Node Js",
+    "Angular",
     "Web Development",
     "Android Development",
     "Java",
@@ -52,6 +55,7 @@ const QuestionTypeSelection = ({
     "Deep Learning",
     "Data Structure",
     "DevOps",
+    "Logic Building",
     "Cyber Security",
     "Digital Marketing",
     "Taxation",
@@ -70,13 +74,33 @@ const QuestionTypeSelection = ({
     setSelectedType(option.label);
   };
 
+  // const isNextDisabled = () => {
+  //   if (!selectedNumQuestions) return true;
+
+  //   if (selectedType === "Question Bank" && !selectedQuestionBank) return true;
+  //   if (selectedType === "Paste Job Description" && !jobDescription)
+  //     return true
+
+  //   return false;
+  // };
+
+
   const isNextDisabled = () => {
-    if (!selectedNumQuestions) return true;
-    if (selectedType === "Question Bank" && !selectedQuestionBank) return true;
-    if (selectedType === "Paste Job Description" && !jobDescription)
-      return true;
-    return false;
+    if (!selectedNumQuestions && selectedType!="Smart AI Interview") return true;
+  
+    switch (selectedType) {
+      case "Smart AI Interview":
+        return !selectedQuestionBank; // Enable "Next" only if a topic is selected
+      case "Question Bank":
+        return !selectedQuestionBank;
+      case "Paste Job Description":
+        return !jobDescription;
+      default:
+        return true;
+    }
   };
+  
+
 
   return (
     <>
@@ -94,7 +118,7 @@ const QuestionTypeSelection = ({
           <Typography variant="h6">Select Question Type</Typography>
         </DialogTitle>
         <DialogContent>
-          <Grid container spacing={3} justifyContent="center" sx={{mt:2}}>
+          <Grid container spacing={3} justifyContent="center" sx={{ mt: 2 }}>
             {questionOptions.map((option) => (
               <Grid item xs={12} sm={6} md={4} key={option.label}>
                 <Card
@@ -119,7 +143,8 @@ const QuestionTypeSelection = ({
           </Grid>
 
           <Grid container spacing={3} sx={{ mt: 3 }}>
-            {(selectedType === "Question Bank" || selectedType==="Smart AI Interview") && (
+            {(selectedType === "Question Bank" ||
+              selectedType === "Smart AI Interview") && (
               <Grid item xs={12}>
                 <Typography variant="h6">Select a Topic:</Typography>
                 <Select
@@ -150,38 +175,56 @@ const QuestionTypeSelection = ({
               </Grid>
             )}
 
-            <Grid item xs={12}>
-              <Typography variant="h6">Select Number of Questions:</Typography>
-              <Select
-                fullWidth
-                value={selectedNumQuestions}
-                onChange={(e) => setSelectedNumQuestions(e.target.value)}
-              >
-                {numQuestionsOptions.map((option) => (
-                  <MenuItem
-                    disabled={coins < option.coins}
-                    key={option.value}
-                    value={option.value}
-                  >
-                    <div style={{ display: "flex", alignItems: "center" }}>
-                      {option.value} Questions - {option.coins}
-                      <img
-                        src="/ezsync-coin.png"
-                        alt="Coin"
-                        style={{
-                          width: "20px",
-                          height: "20px",
-                          marginLeft: "4px",
-                        }}
-                      />
-                    </div>
-                  </MenuItem>
-                ))}
-              </Select>
-            </Grid>
+            {selectedType != "Smart AI Interview" ? (
+              <Grid item xs={12}>
+                <Typography variant="h6">
+                  Select Number of Questions:
+                </Typography>
+                <Select
+                  fullWidth
+                  value={selectedNumQuestions}
+                  onChange={(e) => setSelectedNumQuestions(e.target.value)}
+                >
+                  {numQuestionsOptions.map((option) => (
+                    <MenuItem
+                      disabled={coins < option.coins}
+                      key={option.value}
+                      value={option.value}
+                    >
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        {option.value} Questions - {option.coins}
+                        <img
+                          src="/ezsync-coin.png"
+                          alt="Coin"
+                          style={{
+                            width: "20px",
+                            height: "20px",
+                            marginLeft: "4px",
+                          }}
+                        />
+                      </div>
+                    </MenuItem>
+                  ))}
+                </Select>
+              </Grid>
+            ) : (
+              <Grid item xs={12}>
+               <b>Note: </b><i>10 EZSync Coins 
+                <img
+                  src="/ezsync-coin.png"
+                  alt="Coin"
+                  style={{
+                    display:"inline",
+                    width: "20px",
+                    height: "20px",
+                    marginLeft: "4px",
+                  }}
+                /> will be deducted per question.</i>
+              </Grid>
+            )}
           </Grid>
 
-          {existingQuestions && (
+          {existingQuestions && selectedType!="Smart AI Interview" && (
             <Grid container justifyContent="center" sx={{ mt: 3 }}>
               <Button
                 variant="contained"
@@ -258,75 +301,6 @@ const QuestionTypeSelection = ({
 };
 
 export default QuestionTypeSelection;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // import React, { useState } from "react";
 // import {

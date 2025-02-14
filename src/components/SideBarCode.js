@@ -179,7 +179,7 @@ const SideBarCode = ({ open, setOpen }) => {
   };
 
   const handleSubmit = () => {
-    console.log("Submitted code:", code);
+   // console.log("Submitted code:", code);
     setSubmitedCode(code);
     setCode("");
     setOpen(false);

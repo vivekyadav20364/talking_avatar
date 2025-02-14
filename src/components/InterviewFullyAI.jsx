@@ -9,6 +9,9 @@ import { toast } from "react-toastify";
 import WarningIcon from "@mui/icons-material/Warning"; // Import the warning icon
 import Warning from "@mui/icons-material/Warning";
 import { useNavigate } from "react-router-dom";
+import CircularProgress from "@mui/material/CircularProgress";
+import API from "../utils/api";
+
 
 const InterviewFullyAI = ({ setText,speak,setSpeak }) => {
   const {
@@ -36,18 +39,17 @@ const InterviewFullyAI = ({ setText,speak,setSpeak }) => {
 
   const { stopRecording, startRecording } = useTranscriptionStatus();
 
-  const [currentQuestion, setCurrentQuestion] = useState(`Hello ${user?.fullName} Please Start with a brief introduction about yourself`);
+  const [currentQuestion, setCurrentQuestion] = useState(`Hello ${user?.fullName} please start with a brief introduction about yourself`);
   const [remainingTime, setRemainingTime] = useState(
-     300
+     150
   );
   const [isInterviewStarted, setIsInterviewStarted] = useState(false);
   const [isInterviewFinished, setIsInterviewFinished] = useState(false);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [pageLoading, setPageLoading] = useState(false);
   const [totalQestion,setTotalQuestion]=useState(10);
-
   const [loading,setLoading]=useState(false);
-
+  const [lastQuestion,setLastQuestion]=useState(false);
   const intervalRef = useRef(null);
 
   const [showWarning, setShowWarning] = useState(false); // Control the display of the warning
@@ -73,7 +75,6 @@ const InterviewFullyAI = ({ setText,speak,setSpeak }) => {
   }, [isInterviewStarted]);
 
 
-
   useEffect(() => {
     // Start the interview when interviewOpen becomes true from context
     if (interviewOpen) {
@@ -81,7 +82,7 @@ const InterviewFullyAI = ({ setText,speak,setSpeak }) => {
       setIsInterviewStarted(true);
       setText(currentQuestion); // Set text for the first question
       setSpeak(true);
-      setRemainingTime(300); // Set the initial remaining time
+      setRemainingTime(150); // Set the initial remaining time
       setIsTimerRunning(true); // Start the timer for the first question
       startRecording();
       enterFullScreen(); // Enter fullscreen mode when the interview starts
@@ -97,7 +98,10 @@ const InterviewFullyAI = ({ setText,speak,setSpeak }) => {
             return prevTime - 1;
           } else {
             clearInterval(intervalRef.current);
-            handleNextQuestion();
+            if(lastQuestion){
+              sendInterviewDataToServer();
+            }
+           else  handleNextQuestion();
             return 0; // Ensure timer doesn't go below 0
           }
         });
@@ -116,7 +120,6 @@ const InterviewFullyAI = ({ setText,speak,setSpeak }) => {
     }
   }, [isInterviewFinished]);
 
-
   useEffect(() => {
     if (isInterviewStarted && !isInterviewFinished && speak === false) {
       // Ensure speaking is only triggered when needed and avoids duplicate triggers
@@ -127,19 +130,9 @@ const InterviewFullyAI = ({ setText,speak,setSpeak }) => {
   }, [currentQuestion, isInterviewStarted, isInterviewFinished, speak]);
   
 
-    // Function to save interview data for each question in a state
-  const saveInterviewData = (questionIndex, question, speechText,submitedCode) => {
-    setInterviewData((prevData) => [
-      ...prevData,
-      { questionIndex, question, speechText,submitedCode },
-    ]);
-  };
-
-  //NEW HANDLENEXT FUNCTION
-
-
 const sendInterviewDataToServer = async () => {
     setPageLoading(true);
+
     try {
       const currentUserId = user?._id;
       if (!currentUserId) {
@@ -151,9 +144,9 @@ const sendInterviewDataToServer = async () => {
         return;
       }
   
-      const response = await axios.post(
-        `${baseUrl}/api/questions/evaluate-answer`,
-        { interviewData, currentUserId,totalCoin }
+      const response = await API.post(
+        `http://localhost:8080/api/fully-ai/save-response`,
+        { interviewData, currentUserId,currentQuestion,speechtext}
       );
       // console.log("Response from server evaluate answer", response.data);
       setResult(response.data);
@@ -165,12 +158,13 @@ const sendInterviewDataToServer = async () => {
       setPageLoading(false);
       setThankyouPage(true);
       // Redirect user to another website after 2 seconds
+
       setTimeout(() => {
         navigate("/interview-completed");
-      }, 3000);  // Delay of 3000 milliseconds (2 seconds)
+      }, 3000);  
   
     } catch (error) {
-      console.log(error);
+     // console.log(error);
       toast.error("Error Occurred while submitting",{
         position: "top-right",
         autoClose: 3000,
@@ -179,38 +173,65 @@ const sendInterviewDataToServer = async () => {
     }
   };
   
-  console.log("SAVING INTERVIEW DATA",interviewData);
+ // console.log("SAVING INTERVIEW DATA",interviewData);
 
-  const handleNextQuestion = async() => {
+
+  const handleNextQuestion = async () => {
     setLoading(true);
     
-    const resp=await axios.post("http://localhost:8080/api/fully-ai/next-question",{prevQuestion:currentQuestion,userResponse:speechtext,role:role})
-    console.log("FULL AI RESP",resp);
+    let coinBalance = user?.coins || 0;  // Ensure coinBalance is always a number
+    let availableQuestions = coinBalance >= 100 ? 10 : Math.floor(coinBalance / 10); 
+
+    //console.log("Total question for you:::::===>",availableQuestions);
     
-      setInterviewData([...interviewData,{question:currentQuestion,feedback:resp?.data?.suggestion,score:resp?.data?.score}])
-      if(resp){
-        setTotalQuestion(totalQestion-1);
-      }
-      // Move to the next question
-      setCurrentQuestion(resp?.data?.nextQuestion || "sorry some error occured");
-      setRemainingTime(60);
+    if (interviewData.length >= availableQuestions-2) {
+      setLastQuestion(true);
+    }
+    
+
+    try {
+      const resp = await axios.post("http://localhost:8080/api/fully-ai/next-question", {
+        prevQuestion: currentQuestion,
+        userResponse: speechtext,
+        role: role,
+      });
   
-      // Delay speak trigger until the question changes
+      //console.log("FULL AI RESP", resp);
+  
+      // Update the interview data
+      setInterviewData([
+        ...interviewData,
+        {
+          question: currentQuestion,
+          feedback: resp?.data?.suggestion,
+          score: resp?.data?.score,
+        },
+      ]);
+  
+      // Decrement total questions if response is valid
+      if (resp) {
+        setTotalQuestion(totalQestion - 1);
+      }
+  
+      // Move to the next question or handle fallback message
+      setCurrentQuestion(resp?.data?.nextQuestion || "Sorry, some error occurred.");
+      setRemainingTime(90);
+  
+      // Reset states and recording
       stopRecording();
       setSpeechText("");
       setSpeak(false); // Reset speaking state
       startRecording();
       setSubmitedCode("");
-    
-
-
-       
-      // setIsInterviewFinished(true);
-      // setIsTimerRunning(false);
-      // setInterviewOpen(false);
-      // stopRecording();
-      // setSpeechText("");
+    } catch (error) {
+      //console.error("Error fetching next question:", error);
+      // Handle error case (e.g., show a message to the user)
+      setCurrentQuestion("Sorry, we couldn't fetch the next question. Please try again.");
+    } finally {
+      setLoading(false); // Ensure loading state is reset
     }
+  };
+  
   
 
   const formatTime = (seconds) => {
@@ -311,8 +332,7 @@ const sendInterviewDataToServer = async () => {
           Question:{" "}
           {isInterviewStarted && !isInterviewFinished && (
             <span>
-              {/* {currentQuestion + 1}/{questions.length} */}
-              {/* {currentQuestion} */}
+             {interviewData?.length+1}
             </span>
           )}
         </h2>
@@ -350,12 +370,23 @@ const sendInterviewDataToServer = async () => {
                 <div className="flex flex-row gap-x-3 justify-start items-end h-full">
                   {isTimerRunning && (
                     <div className="flex flex-row justify-end items-center w-full">
-                      <button
+
+                    <button
+                        className="bg-red-600 text-white py-2 px-4 rounded inline-block font-semibold hover:bg-red-400 transition-colors duration-75 mr-4"
+                        disabled={loading}
+                        onClick={sendInterviewDataToServer}
+                      >
+                        Final Submit
+                      </button>
+
+                     { !lastQuestion &&  <button
                         className=" bg-green-600 text-white py-2 px-4 rounded inline-block font-semibold hover:bg-green-500 transition-colors duration-75 "
                         onClick={handleNextQuestion}
+                        disabled={loading}
                       >
-                        Next Question
+                        {loading? <CircularProgress size={20} sx={{color: "white"}}/>:"Next Question"}
                       </button>
+                     }
                     </div>
                   )}
                 </div>

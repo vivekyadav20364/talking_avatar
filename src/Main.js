@@ -26,7 +26,7 @@ const Main = () => {
         })
         .then((response) => {
           // Token is valid, extract the user ID
-          console.log('Token is valid and verified:', response.data);
+         // console.log('Token is valid and verified:', response.data);
           const userId = response.data.user.id;  // Assuming the user ID is in the token response
           localStorage.setItem("interview-user",JSON.stringify(response.data?.user));
           // Make an API call to the first website to fetch the full user details
@@ -37,7 +37,7 @@ const Main = () => {
             .then((userResponse) => {
               // Set the user in context
               setUser(userResponse.data);
-              // console.log('Full user details fetched:', userResponse.data);
+              //console.log('Full user details fetched:', userResponse.data);
   
               // Indicate loading is complete
               setVerifyUserLoading(false);
@@ -48,17 +48,17 @@ const Main = () => {
             })
             .catch((error) => {
               // Handle error fetching full user details
-              console.error('Error fetching user details:', error);
+             // console.error('Error fetching user details:', error);
               toast.error('Failed to fetch user details. Please try again.',{
                 position: "top-right",
                 autoClose: 3000,
               });
-              window.location.href = `${Base_Url_Landing_Page_Frontend}/login`;
+             window.location.href = `${Base_Url_Landing_Page_Frontend}/login`;
             });
         })
         .catch((error) => {
           // Handle invalid token
-          console.error('Token verification failed:', error);
+          //console.error('Token verification failed:', error);
           toast.error('Token verification failed. Please login again.',{
             position: "top-right",
             autoClose: 3000,
